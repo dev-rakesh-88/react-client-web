@@ -1,17 +1,16 @@
-import { useState, useRef } from "react";
-import useLongPress from "./hooks/useLongPress";
+import { useState, useRef, useEffect } from "react";
+import './AudioRecorder.css'
+import nouns from "./utils/nouns.json"
+const sheet = nouns.Sheet1
 const mimeType = "audio/mp3";
 const AudioRecorder = () => {
     const [permission, setPermission] = useState(false);
     const [stream, setStream] = useState(null);
-
     const mediaRecorder = useRef(null);
     const [recordingStatus, setRecordingStatus] = useState("inactive");
-
+    const [word, setWord] = useState('')
     const [audioChunks, setAudioChunks] = useState([]);
     const [audio, setAudio] = useState(null);
-
-    const [startRecord,setStartRecord] = useState(false)
 
     const getMicrophonePermission = async () => {
         if ("MediaRecorder" in window) {
@@ -22,6 +21,8 @@ const AudioRecorder = () => {
                 });
                 setPermission(true);
                 setStream(streamData);
+                await getWord()
+                await startRecording(streamData)
             } catch (err) {
                 alert(err.message);
             }
@@ -29,10 +30,10 @@ const AudioRecorder = () => {
             alert("The MediaRecorder API is not supported in your browser.");
         }
     };
-    const startRecording = async () => {
+    const startRecording = async (streamData) => {
         setRecordingStatus("recording");
         //create new Media recorder instance using the stream
-        const media = new MediaRecorder(stream, { type: mimeType });
+        const media = new MediaRecorder(streamData, { type: mimeType });
         //set the MediaRecorder instance to the mediaRecorder ref
         mediaRecorder.current = media;
         //invokes the start method to start the recording process
@@ -58,51 +59,59 @@ const AudioRecorder = () => {
             setAudioChunks([]);
         };
     }
-
-    const onLongPress = () => {
-        setStartRecord(false)
-    };
-
-    const onClick = () => {
-        setStartRecord(true)
+    function getRandomWord() {
+        let min = 1;
+        let max = sheet.length -1;
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        const index = Math.floor(Math.random() * (max - min + 1)) + min;
+        const word = sheet[index].noun
+        return word
     }
-    const defaultOptions = {
-        shouldPreventDefault: true,
-        delay: 2000,
-    };
-    const longPressEvent = useLongPress(onLongPress, onClick, defaultOptions);
+
+    function getWord () {
+        let wordLength = 0;
+        let word = ""
+        while (wordLength < 3 || wordLength > 6) {
+            word = getRandomWord()
+            wordLength = word.length;
+        }
+        setWord(word)
+    }
+  
     return (
-        <div>
-            <h2>Audio Recorder</h2>
+        <div id="main">
             <main>
-                <div className="audio-controls">
+            <h2>Read following text</h2>
+                <div className="audio-controls" id="audio-controller">
                     {!permission ? (
-                        <button onClick={getMicrophonePermission} type="button">
-                            Get Microphone
+                        <button onClick={getMicrophonePermission} type="button" id="get-text-btn">
+                            Get me the text
                         </button>
                     ) : null}
-                    {permission && recordingStatus === "inactive" ? (
+                    {/* {permission && recordingStatus === "inactive" ? (
                         <button onClick={startRecording} type="button">
                             Start Recording
                         </button>
+                    ) : null} */}
+                    {permission && recordingStatus === "recording" ? (
+                        <label id="word-label">
+                            {word}
+                        </label>
                     ) : null}
                     {recordingStatus === "recording" ? (
-                        <button onClick={stopRecording} type="button">
+                        <button onClick={stopRecording} type="button" id="stop-btn">
                             Stop Recording
                         </button>
                     ) : null}
-                    {audio ? (
+                    {/* {audio ? (
                         <div className="audio-container">
                             <audio src={audio} controls></audio>
                             <a download href={audio}>
                                 Download Recording
                             </a>
                         </div>
-                    ) : null}
-                    <br/>
-                    {startRecord && <p>Spell the word</p>}
-
-<button {...longPressEvent}>use  Loooong  Press</button>
+                    ) : null} */}
                 </div>
             </main>
         </div>
