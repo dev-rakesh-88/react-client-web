@@ -57,11 +57,12 @@ const AudioRecorder = () => {
             const audioUrl = URL.createObjectURL(audioBlob);
             setAudio(audioUrl);
             setAudioChunks([]);
+            setRecordingStatus("finished")
         };
     }
     function getRandomWord() {
         let min = 1;
-        let max = sheet.length -1;
+        let max = sheet.length - 1;
         min = Math.ceil(min);
         max = Math.floor(max);
         const index = Math.floor(Math.random() * (max - min + 1)) + min;
@@ -69,7 +70,7 @@ const AudioRecorder = () => {
         return word
     }
 
-    function getWord () {
+    function getWord() {
         let wordLength = 0;
         let word = ""
         while (wordLength < 3 || wordLength > 6) {
@@ -78,13 +79,21 @@ const AudioRecorder = () => {
         }
         setWord(word)
     }
-  
+
+    function sleep(milliseconds) {
+        const date = Date.now();
+        let currentDate = null;
+        do {
+            currentDate = Date.now();
+        } while (currentDate - date < milliseconds);
+    }
+
     return (
         <div id="main">
             <main>
-            <h2>Read following text</h2>
+                <h2>{(recordingStatus !== "finished") ? "Read following text" : "Done!"}</h2>
                 <div className="audio-controls" id="audio-controller">
-                    {!permission ? (
+                    {(!permission && (recordingStatus !== "finished")) ? (
                         <button onClick={getMicrophonePermission} type="button" id="get-text-btn">
                             Get me the text
                         </button>
@@ -101,7 +110,7 @@ const AudioRecorder = () => {
                     ) : null}
                     {recordingStatus === "recording" ? (
                         <button onClick={stopRecording} type="button" id="stop-btn">
-                            Stop Recording
+                            Finished
                         </button>
                     ) : null}
                     {/* {audio ? (

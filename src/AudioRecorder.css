@@ -1,6 +1,9 @@
 #main {
     width: 100%;
-    margin-top: 50%;
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 main {
@@ -18,7 +21,6 @@ main {
 }
 
 #get-text-btn, #word-label,#stop-btn {
-
     background-color: #111827;
     border: 1px solid transparent;
     border-radius: .75rem;
@@ -43,6 +45,7 @@ main {
     width: auto;
     margin-bottom: 10px;
 }
+
 #word-label{
     background-color: transparent;
     color: #111827;
